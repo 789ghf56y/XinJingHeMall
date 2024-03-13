@@ -20,6 +20,7 @@
         <module>mall-system</module>
         <module>mall-tenant</module>
         <module>mall-staff</module>
+        <module>mall-gateway</module>
     </modules>
 
     <properties>

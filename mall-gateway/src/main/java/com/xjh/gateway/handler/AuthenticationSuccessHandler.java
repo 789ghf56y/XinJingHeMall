@@ -27,6 +27,6 @@ public class AuthenticationSuccessHandler extends WebFilterChainServerAuthentica
         headers.add("Content-Type","application/json;charset=UTF-8");
         headers.add("Cache-control","no-store,no-cache,must-revalidate,max-age-8");
         R<AuthUserDetails> result = R.ok();
-
+        return null;
     }
 }
