@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjh.mapper.UsrRoleMapper">
+  <resultMap id="BaseResultMap" type="com.xjh.pojo.UsrRole">
+    <!--@mbg.generated-->
+    <!--@Table usr_role-->
+    <id column="role_id" jdbcType="INTEGER" property="roleId" />
+    <result column="role_name" jdbcType="VARCHAR" property="roleName" />
+    <result column="role_key" jdbcType="VARCHAR" property="roleKey" />
+    <result column="role_sort" jdbcType="VARCHAR" property="roleSort" />
+    <result column="del_flag" jdbcType="INTEGER" property="delFlag" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    role_id, role_name, role_key, role_sort, del_flag, `status`, create_time, update_time, 
+    create_by, update_by, remark
+  </sql>
+
+  <select id="selectByUserId" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List">
+  </include>
+    FROM  usr_role ur left join usr_user_role uur on ur.role_id = uur.role_id
+    left join usr_user uu on uur.user_id = uu.user_id
+    where uu.user_id = #{userId}
+  </select>
+</mapper>

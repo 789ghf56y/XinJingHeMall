@@ -30,7 +30,7 @@
         <spring-boot.version>2.7.2</spring-boot.version>
         <spring-cloud.version>2021.0.3</spring-cloud.version>
         <spring-cloud-alibaba.version>2021.0.1.0</spring-cloud-alibaba.version>
-        <kaptcha.version>2.3.2</kaptcha.version>
+        <captcha.version>1.6.2</captcha.version>
         <swagger.core.version>1.6.2</swagger.core.version>
         <commons.io.version>2.11.0</commons.io.version>
         <commons.fileupload.version>1.4</commons.fileupload.version>
@@ -92,9 +92,9 @@
             </dependency>
             <!--验证码-->
             <dependency>
-                <groupId>com.github.penggle</groupId>
-                <artifactId>kaptcha</artifactId>
-                <version>${kaptcha.version}</version>
+                <groupId>com.github.whvcse</groupId>
+                <artifactId>easy-captcha</artifactId>
+                <version>${captcha.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
