@@ -13,8 +13,3 @@ spring:
         username: nacos
         password: nacos
         namespace: public
-
-config:
-  jwt:
-    secret: xjh
-    expire-time: 60 * 60 * 1000L
