@@ -6,5 +6,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface UsrUserService extends IService<UsrUser>{
 
 
-    R login(String account, String password);
+    R login(String account, String password,String userType);
 }

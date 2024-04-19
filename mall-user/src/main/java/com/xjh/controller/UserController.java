@@ -10,8 +10,6 @@ import com.xjh.pojo.vo.CaptchaVo;
 import com.xjh.service.UsrUserService;
 import com.xjh.status.StatusCode;
 import com.xjh.utils.RedisUtil;
-import org.bouncycastle.crypto.digests.MD5Digest;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +34,7 @@ public class UserController {
         if(StringUtils.isEmpty(redisCode) || !redisCode.equals(loginUser.getCaptchaCode())) {
             return R.fail(StatusCode.USER_PARAMETER.getCode(), "验证码错误！");
         }
-        R result = userService.login(loginUser.getAccount(),loginUser.getPassword());
+        R result = userService.login(loginUser.getUsername(),loginUser.getPassword(),loginUser.getUserType());
         return result;
     }
 

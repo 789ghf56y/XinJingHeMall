@@ -5,10 +5,13 @@
     <!--@mbg.generated-->
     <!--@Table usr_permission-->
     <id column="id" jdbcType="INTEGER" property="id" />
+    <id column="parent_id" jdbcType="INTEGER" property="parentId" />
     <result column="type" jdbcType="INTEGER" property="type" />
     <result column="code" jdbcType="VARCHAR" property="code" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="component" jdbcType="VARCHAR" property="component" />
+    <result column="meta" jdbcType="VARCHAR" property="meta" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
     <result column="create_by" jdbcType="VARCHAR" property="createBy" />
@@ -17,13 +20,12 @@
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated-->
-    id, `type`, code, `name`, url, create_time, update_time, create_by, update_by, remark
+    id, parent_id,`type`, code, `name`, url, component,meta,create_time, update_time, create_by, update_by, remark
   </sql>
 
-  <select id="selectByRoleId" resultType="java.lang.String">
-        select <include refid="Base_Column_List">
-  </include>
-    from from usr_permission up left join usr_role_permission urp on up.id = urp.privilege_id
+  <select id="selectByRoleId" resultMap="BaseResultMap">
+    select up.*
+    from usr_permission up left join usr_role_permission urp on up.id = urp.privilege_id
     left join usr_role ur on urp.role_id = ur.role_id
     where ur.role_id = #{roleId}
   </select>

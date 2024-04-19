@@ -6,5 +6,5 @@ import com.xjh.pojo.UsrPermission;
 import java.util.List;
 
 public interface UsrPermissionMapper extends BaseMapper<UsrPermission> {
-    List<String> selectByRoleId(Integer roleId);
+    List<UsrPermission> selectByRoleId(Integer roleId);
 }

@@ -1,13 +1,17 @@
 package com.xjh.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xjh.mapper.UsrPermissionMapper;
 import com.xjh.mapper.UsrRoleMapper;
 import com.xjh.model.R;
+import com.xjh.pojo.UsrPermission;
 import com.xjh.pojo.UsrRole;
 import com.xjh.pojo.dto.CurrentUserDto;
 import com.xjh.pojo.vo.LoginUserRoleVo;
 import com.xjh.pojo.vo.LoginUserVo;
+import com.xjh.pojo.vo.MenuVo;
 import com.xjh.status.StatusCode;
 import com.xjh.utils.JwtUtil;
 import org.springframework.beans.BeanUtils;
@@ -20,9 +24,11 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> implements UsrUserService{
@@ -35,9 +41,11 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
 
 
     @Override
-    public R login(String account, String password) {
+    public R login(String username, String password,String userType) {
 
-        List<UsrUser> userList = userMapper.selectList(new LambdaQueryWrapper<UsrUser>().eq(StringUtils.hasLength(account), UsrUser::getUsername, account));
+        List<UsrUser> userList = userMapper.selectList(new LambdaQueryWrapper<UsrUser>()
+                .eq(StringUtils.hasLength(username), UsrUser::getUsername, username)
+                .eq(StringUtils.hasLength(userType),UsrUser::getUserType,userType));
         if (CollectionUtils.isEmpty(userList)) {
             return R.fail(StatusCode.USER_LOGIN, "登录失败，未找到账号信息");
         }
@@ -63,9 +71,10 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
         CurrentUserDto currentUserDto = new CurrentUserDto();
         currentUserDto.setUserId(userDO.getUserId());
         currentUserDto.setUsername(userDO.getUsername());
-//        查询该用户角色的权限
-        List<String> permissions = permissionMapper.selectByRoleId(usrRole.getRoleId());
-        currentUserDto.setUrlPatternList(permissions);
+//        查询该用户角色的权限(权限目前是只有菜单权限)
+        List<UsrPermission> permissions = permissionMapper.selectByRoleId(usrRole.getRoleId());
+        List<String> permissionUrlList = permissions.stream().map(item -> item.getUrl()).collect(Collectors.toList());
+        currentUserDto.setUrlPatternList(permissionUrlList);
 //          生成token
         Map<String, Object> userMap = new HashMap<>();
         userMap.put("user-info",currentUserDto);
@@ -75,12 +84,61 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
         BeanUtils.copyProperties(userDO,loginUserVo);
         LoginUserRoleVo userRoleVo = new LoginUserRoleVo();
         BeanUtils.copyProperties(usrRole,userRoleVo);
-
         loginUserVo.setRole(userRoleVo);
+
+//        返回菜单
+        List<MenuVo> menuVoList = permissions.stream().map(permission->{
+            ObjectMapper objectMapper = new ObjectMapper();
+            Object meta;
+            try {
+                meta = objectMapper.readValue(permission.getMeta(),Object.class);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+            MenuVo menuVo = new MenuVo();
+            BeanUtils.copyProperties(permission,menuVo);
+            menuVo.setMeta(meta);
+            return menuVo;
+        }).collect(Collectors.toList());
+        menuVoList = buildTree(menuVoList);
         HashMap<String, Object> resultMap = new HashMap<>();
         resultMap.put("token",token);
         resultMap.put("user-info",loginUserVo);
-        resultMap.put("menuList",permissions);
+        resultMap.put("menuList",menuVoList);
         return R.ok(resultMap);
     }
+
+//    构建树形菜单
+    public List<MenuVo> buildTree(List<MenuVo> menuVoList){
+        List<MenuVo> resultMenuVoList = new ArrayList<>();
+        for(MenuVo rootMenuVo : getRootMenu(menuVoList)){
+            rootMenuVo = buildChildTree(rootMenuVo,menuVoList);
+            resultMenuVoList.add(rootMenuVo);
+        }
+        return resultMenuVoList;
+    }
+
+//    构建根菜单的子节点
+    public MenuVo buildChildTree(MenuVo rootMenuVo,List<MenuVo> menuVoList){
+        List<MenuVo> childMenuVoList = new ArrayList<>();
+        for(MenuVo menuVo : menuVoList){
+            if(menuVo.getParentId().equals(rootMenuVo.getId())){
+                childMenuVoList.add(buildChildTree(menuVo,menuVoList));
+            }
+        }
+        rootMenuVo.setChildren(childMenuVoList);
+        return rootMenuVo;
+    }
+
+//  获取根菜单
+    public List<MenuVo> getRootMenu(List<MenuVo> menuVoList){
+        List<MenuVo> rootMenuVoList = new ArrayList<>();
+        for(MenuVo menuVo : menuVoList){
+            if(menuVo.getParentId() == 0){
+                rootMenuVoList.add(menuVo);
+            }
+        }
+        return rootMenuVoList;
+    }
+
 }
