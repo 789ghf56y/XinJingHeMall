@@ -17,6 +17,10 @@ public class R<T> implements Serializable {
         this.data = data;
     }
 
+    public R(int code) {
+        this.code = code;
+    }
+
     public static <T>R<T> ok(){
         return new R<T>(SUCCESS,null,null);
     }
