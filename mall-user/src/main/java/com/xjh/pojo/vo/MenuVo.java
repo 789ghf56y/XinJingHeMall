@@ -11,7 +11,8 @@ public class MenuVo {
     private String code;
     private String name;
     private Integer parentId;
-    private String url;
+    private String path;
+    private String redirect;
     private String component;
     private Object meta;
     private List<MenuVo> children;

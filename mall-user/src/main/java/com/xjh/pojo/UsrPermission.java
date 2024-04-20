@@ -40,8 +40,11 @@ public class UsrPermission {
     /**
      * 路由地址
      */
-    @TableField(value = "url")
-    private String url;
+    @TableField(value = "path")
+    private String path;
+
+    @TableField(value = "redirect")
+    private String redirect;
 
     @TableField(value = "component")
     private String component;

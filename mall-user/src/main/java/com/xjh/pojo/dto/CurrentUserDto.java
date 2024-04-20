@@ -8,8 +8,8 @@ import java.util.List;
 public class CurrentUserDto {
     private String userId;
     private String username;
-    private Integer roleType;
-    private String currentRoleId;
+    private String roleType;
+    private Integer currentRoleId;
     private List<String> urlPatternList;
 
 }

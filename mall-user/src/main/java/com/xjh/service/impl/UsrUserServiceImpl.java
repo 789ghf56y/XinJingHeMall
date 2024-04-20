@@ -14,6 +14,7 @@ import com.xjh.pojo.vo.LoginUserVo;
 import com.xjh.pojo.vo.MenuVo;
 import com.xjh.status.StatusCode;
 import com.xjh.utils.JwtUtil;
+import com.xjh.utils.RequestUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,10 +25,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,9 +70,11 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
         CurrentUserDto currentUserDto = new CurrentUserDto();
         currentUserDto.setUserId(userDO.getUserId());
         currentUserDto.setUsername(userDO.getUsername());
+        currentUserDto.setRoleType(userType);
+        currentUserDto.setCurrentRoleId(usrRole.getRoleId());
 //        查询该用户角色的权限(权限目前是只有菜单权限)
         List<UsrPermission> permissions = permissionMapper.selectByRoleId(usrRole.getRoleId());
-        List<String> permissionUrlList = permissions.stream().map(item -> item.getUrl()).collect(Collectors.toList());
+        List<String> permissionUrlList = permissions.stream().map(item -> item.getPath()).collect(Collectors.toList());
         currentUserDto.setUrlPatternList(permissionUrlList);
 //          生成token
         Map<String, Object> userMap = new HashMap<>();
@@ -82,12 +83,50 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
 //      返回用户信息Vo（包括用户一些信息和角色信息）
         LoginUserVo loginUserVo = new LoginUserVo();
         BeanUtils.copyProperties(userDO,loginUserVo);
+        loginUserVo.setName(userDO.getPickName());
         LoginUserRoleVo userRoleVo = new LoginUserRoleVo();
         BeanUtils.copyProperties(usrRole,userRoleVo);
         loginUserVo.setRole(userRoleVo);
 
 //        返回菜单
-        List<MenuVo> menuVoList = permissions.stream().map(permission->{
+        List<MenuVo> menuVoList  = copyMenuInfo(permissions);
+        menuVoList = buildTree(menuVoList);
+        HashMap<String, Object> resultMap = new HashMap<>();
+        resultMap.put("token",token);
+        resultMap.put("user-info",loginUserVo);
+        resultMap.put("menuList",menuVoList);
+        resultMap.put("userType",userType);
+        return R.ok(resultMap);
+    }
+
+    @Override
+    public R refreshUserInfoByToken(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        token = StringUtils.hasLength(token) ? token : token.replace("Bearer ", "");
+        //当前用户
+        CurrentUserDto currentUser = new CurrentUserDto();
+        if (request.getAttribute("user") == null) {
+            Map<String,Object> map = JwtUtil.parseJwt(token);
+            Map<String,Object> userMap  = (LinkedHashMap) map.get("user-info");
+            currentUser.setUserId((String) userMap.get("userId"));
+            currentUser.setCurrentRoleId((Integer) userMap.get("currentRoleId"));
+            request.setAttribute("user", currentUser);
+        }else {
+            currentUser = (CurrentUserDto) request.getAttribute("user");
+        }
+        List<UsrRole> usrRoles = roleMapper.selectByUserId(currentUser.getUserId());
+        UsrRole usrRole = usrRoles.get(0);
+        List<UsrPermission> permissions = permissionMapper.selectByRoleId(usrRole.getRoleId());
+        List<MenuVo> menuVoList  = copyMenuInfo(permissions);
+        menuVoList = buildTree(menuVoList);
+        HashMap<String, Object> resultMap = new HashMap<>();
+        resultMap.put("menuList",menuVoList);
+        return R.ok(resultMap);
+    }
+
+
+    public List<MenuVo> copyMenuInfo(List<UsrPermission> permissions){
+        return permissions.stream().map(permission->{
             ObjectMapper objectMapper = new ObjectMapper();
             Object meta;
             try {
@@ -100,15 +139,9 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
             menuVo.setMeta(meta);
             return menuVo;
         }).collect(Collectors.toList());
-        menuVoList = buildTree(menuVoList);
-        HashMap<String, Object> resultMap = new HashMap<>();
-        resultMap.put("token",token);
-        resultMap.put("user-info",loginUserVo);
-        resultMap.put("menuList",menuVoList);
-        return R.ok(resultMap);
     }
 
-//    构建树形菜单
+    //    构建树形菜单
     public List<MenuVo> buildTree(List<MenuVo> menuVoList){
         List<MenuVo> resultMenuVoList = new ArrayList<>();
         for(MenuVo rootMenuVo : getRootMenu(menuVoList)){
