@@ -35,7 +35,7 @@ public class OssController {
             throw new RuntimeException(e);
         }
         // Endpoint以华东1（杭州）为例，其他Region请按实际情况填写。
-        String endpoint = "oss-cn-hangzhou.aliyuncs.com";
+        String endpoint = "oss-cn-beijing.aliyuncs.com";
         // 填写Bucket名称，例如examplebucket。
         String bucket = "xjh-mall-image";
         // 填写Host名称，格式为https://bucketname.endpoint。

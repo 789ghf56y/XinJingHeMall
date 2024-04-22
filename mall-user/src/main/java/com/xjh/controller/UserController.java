@@ -148,7 +148,7 @@ public class UserController {
 
 
     @DeleteMapping("/batchDeleteUser")
-    public R deleteUserById(@RequestBody List<String> ids){
+    public R batchDeleteUser(@RequestBody List<String> ids){
         userService.removeByIds(ids);
         return R.ok();
     }

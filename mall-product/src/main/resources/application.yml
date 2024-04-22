@@ -4,9 +4,6 @@ spring:
     username: root
     password: gzmzdx12138
     driver-class-name: com.mysql.cj.jdbc.Driver
-#  cloud:
-#    alicloud:
-#      oss:
-#        endpoint: oss-cn-beijing.aliyuncs.com
-#      access-key: LTAI5tSSP6LtyWgU3L9BZi11
-#      secret-key: aiWnBFeUynAHF4J19SEoo1GUMTKJrT
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #开启sql日志
