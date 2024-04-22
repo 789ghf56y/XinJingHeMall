@@ -37,13 +37,13 @@ public class UsrRole {
      */
     @TableField(value = "del_flag")
     @TableLogic
-    private Integer delFlag;
+    private Boolean delFlag;
 
     /**
      * 角色状态（0禁用 1启用）
      */
     @TableField(value = "`status`")
-    private Integer status;
+    private Boolean status;
 
     /**
      * 创建时间

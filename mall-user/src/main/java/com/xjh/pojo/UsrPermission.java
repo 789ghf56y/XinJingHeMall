@@ -52,6 +52,8 @@ public class UsrPermission {
     @TableField(value = "meta")
     private String meta;
 
+    @TableField(value = "order_num")
+    private Integer orderNum;
 
     /**
      * 创建时间

@@ -3,6 +3,8 @@ package com.xjh.pojo;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 @Data
@@ -89,25 +91,27 @@ public class UsrUser {
      * 账号状态（0禁用 1启用）
      */
     @TableField(value = "`status`")
-    private Integer status;
+    private Boolean status;
 
     /**
      * 删除标志（0未删除 1已删除）
      */
     @TableField(value = "del_flag")
     @TableLogic
-    private Integer delFlag;
+    private Boolean delFlag;
 
     /**
      * 创建时间
      */
     @TableField(value = "create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createTime;
 
     /**
      * 修改时间
      */
     @TableField(value = "update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date updateTime;
 
     /**

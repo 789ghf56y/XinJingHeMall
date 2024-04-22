@@ -1,9 +1,14 @@
 spring:
+  cloud:
+    alicloud:
+      access-key: LTAI5tSSP6LtyWgU3L9BZi11
+      secret-key: aiWnBFeUynAHF4J19SEoo1GUMTKJrT
+      oss:
+        endpoint: oss-cn-beijing.aliyuncs.comspring
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/bs?useSSL=false&characterEncoding=utf8&serverTimeZone=UTC
     username: root
     password: gzmzdx12138
     driver-class-name: com.mysql.cj.jdbc.Driver
-  redis:
-    host: 114.55.67.138
-    password: gzmzdx12138
+server:
+  port: 17075
