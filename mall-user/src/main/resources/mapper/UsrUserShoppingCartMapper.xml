@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xjh.mapper.UsrUserShoppingCartMapper">
+  <resultMap id="BaseResultMap" type="com.xjh.pojo.UsrUserShoppingCart">
+    <!--@mbg.generated-->
+    <!--@Table usr_user_shopping_cart-->
+    <id column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="product_id" jdbcType="VARCHAR" property="productId" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="price" jdbcType="DECIMAL" property="price" />
+    <result column="num" jdbcType="INTEGER" property="num" />
+    <result column="imag_url" jdbcType="VARCHAR" property="imagUrl" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, user_id, product_id, product_name, price, num, imag_url, description
+  </sql>
+</mapper>

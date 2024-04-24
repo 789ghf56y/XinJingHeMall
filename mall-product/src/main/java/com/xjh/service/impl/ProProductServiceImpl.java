@@ -54,8 +54,14 @@ public class ProProductServiceImpl extends ServiceImpl<ProProductMapper, ProProd
             }
             return productVo;
         }).distinct().collect(Collectors.toList());
-
-        return productVoList;
+        int pageNum = productQuery.getPageSize().intValue() * (productQuery.getPageNum().intValue() - 1);
+        int pageSize = productQuery.getPageSize().intValue() * productQuery.getPageNum().intValue();
+        pageSize = pageSize > productVoList.size()-1?productVoList.size():pageSize;
+        if(pageNum > productVoList.size()){
+            return null;
+        }else{
+            return new ArrayList<>(productVoList.subList(pageNum, pageSize));
+        }
     }
 
     @Override

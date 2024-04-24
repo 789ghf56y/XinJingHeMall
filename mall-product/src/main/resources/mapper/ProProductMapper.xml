@@ -42,8 +42,6 @@
         and pp.create_time between #{createTimeStart} and #{createTimeEnd}
       </if>
     </where>
-
-    limit #{pageNum},#{pageSize}
   </select>
 
   <select id="getProductsByClassifyId" resultMap="BaseResultMap">

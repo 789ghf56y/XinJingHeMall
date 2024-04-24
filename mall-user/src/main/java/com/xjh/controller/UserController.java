@@ -7,23 +7,24 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.wf.captcha.SpecCaptcha;
 import com.wf.captcha.base.Captcha;
-import com.xjh.mapper.UsrPermissionMapper;
 import com.xjh.mapper.UsrRoleMapper;
 import com.xjh.model.PageResult;
 import com.xjh.model.R;
 import com.xjh.pojo.UsrLoginUser;
 import com.xjh.pojo.UsrRole;
 import com.xjh.pojo.UsrUser;
+import com.xjh.pojo.UsrUserShoppingCart;
 import com.xjh.pojo.query.CommonUserQuery;
 import com.xjh.pojo.query.ManagerUserQuery;
 import com.xjh.pojo.vo.CaptchaVo;
 import com.xjh.pojo.vo.CommonUserVo;
 import com.xjh.pojo.vo.ManagerUserVo;
-import com.xjh.service.UsrPermissionService;
 import com.xjh.service.UsrUserService;
+import com.xjh.service.UsrUserShoppingCartService;
 import com.xjh.status.StatusCode;
 import com.xjh.utils.RedisUtil;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -46,6 +47,9 @@ public class UserController {
     @Resource
     private UsrRoleMapper roleMapper;
 
+    @Resource
+    private UsrUserShoppingCartService userShoppingCartService;
+
     @PostMapping("/login")
     public R login(@RequestBody UsrLoginUser loginUser){
         // 校验图形验证码
@@ -57,6 +61,17 @@ public class UserController {
         return result;
     }
 
+
+    @GetMapping("/getCommonUserById")
+    public R getUserById(String userId,String userType){
+        LambdaQueryWrapper<UsrUser> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.isNotBlank(userId),UsrUser::getUserId,userId)
+                        .eq(StringUtils.isNotBlank(userType),UsrUser::getUserType,userType);
+        UsrUser user = userService.getOne(queryWrapper);
+        CommonUserVo userVo = new CommonUserVo();
+        BeanUtils.copyProperties(user,userVo);
+        return R.ok(userVo);
+    }
 
     @GetMapping("/captcha")
     public R graphCaptcha(){
@@ -174,5 +189,49 @@ public class UserController {
         return R.ok();
     }
 
+    @GetMapping("/getShoppingCart/{id}")
+    public R getUserShoppingCart(@PathVariable String id){
+        LambdaQueryWrapper<UsrUserShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(StringUtils.isNotBlank(id),UsrUserShoppingCart::getUserId,id);
+        List<UsrUserShoppingCart> list = userShoppingCartService.list(queryWrapper);
+        return R.ok(list);
+    }
+
+    @PostMapping("/saveToCart")
+    @Transactional
+    public R saveToCart(@RequestBody UsrUserShoppingCart userShoppingCart){
+        LambdaQueryWrapper<UsrUserShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UsrUserShoppingCart::getUserId,userShoppingCart.getUserId())
+                        .eq(UsrUserShoppingCart::getProductId,userShoppingCart.getProductId());
+        UsrUserShoppingCart one = userShoppingCartService.getOne(queryWrapper);
+        LambdaUpdateWrapper<UsrUserShoppingCart> updateWrapper = new LambdaUpdateWrapper<>();
+        if(one!=null){
+            updateWrapper.eq(UsrUserShoppingCart::getId,one.getId());
+            userShoppingCart.setNum(one.getNum()+userShoppingCart.getNum());
+            userShoppingCartService.update(userShoppingCart,updateWrapper);
+        }else{
+            userShoppingCartService.save(userShoppingCart);
+        }
+        return R.ok();
+    }
+
+
+    @DeleteMapping("/deleteCart")
+    @Transactional
+    public R deleteCart(@RequestBody UsrUserShoppingCart userShoppingCart){
+        LambdaQueryWrapper<UsrUserShoppingCart> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(UsrUserShoppingCart::getUserId,userShoppingCart.getUserId())
+                .eq(UsrUserShoppingCart::getProductId,userShoppingCart.getProductId());
+        LambdaUpdateWrapper<UsrUserShoppingCart> updateWrapper = new LambdaUpdateWrapper<>();
+        UsrUserShoppingCart one = userShoppingCartService.getOne(queryWrapper);
+        if(one!=null && one.getNum()-userShoppingCart.getNum() > 0){
+            updateWrapper.eq(UsrUserShoppingCart::getId,one.getId());
+            userShoppingCart.setNum(one.getNum()-userShoppingCart.getNum());
+            userShoppingCartService.update(updateWrapper);
+        }else{
+            userShoppingCartService.removeById(userShoppingCart.getId());
+        }
+        return R.ok();
+    }
 
 }

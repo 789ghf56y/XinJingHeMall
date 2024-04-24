@@ -57,6 +57,8 @@ public class CommonUserVo {
      */
     private String address;
 
+    private String userDesc;
+
     /**
      * 账号状态（0禁用 1启用）
      */

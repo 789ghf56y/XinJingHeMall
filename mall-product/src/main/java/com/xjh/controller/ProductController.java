@@ -38,12 +38,11 @@ public class ProductController {
         List<ProductVo> productList =  proProductService.getProductList(productQuery);
         PageResult<ProductVo> pageResult = new PageResult<>();
         pageResult.setList(productList);
-        pageResult.setTotal(new Long(productList.size()));
+        pageResult.setTotal(new Long(proProductService.count()));
         pageResult.setPageNum(productQuery.getPageNum());
         pageResult.setPageSize(productQuery.getPageSize());
         return R.ok(pageResult);
     }
-
 
 //    删除一个商品
     @DeleteMapping("/deleteProduct/{id}")

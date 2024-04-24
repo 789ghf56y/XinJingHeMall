@@ -23,6 +23,7 @@ import com.xjh.mapper.UsrUserMapper;
 import com.xjh.service.UsrUserService;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -93,11 +94,12 @@ public class UsrUserServiceImpl extends ServiceImpl<UsrUserMapper, UsrUser> impl
         menuVoList = buildTree(menuVoList);
         HashMap<String, Object> resultMap = new HashMap<>();
         resultMap.put("token",token);
-        resultMap.put("user-info",loginUserVo);
+        resultMap.put("userInfo",loginUserVo);
         resultMap.put("menuList",menuVoList);
         resultMap.put("userType",userType);
         return R.ok(resultMap);
     }
+
 
     @Override
     public R refreshUserInfoByToken(HttpServletRequest request) {
